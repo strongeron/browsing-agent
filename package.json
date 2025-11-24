@@ -26,6 +26,7 @@
     "@mastra/observability": "1.0.0-beta.1",
     "bufferutil": "^4.0.8",
     "chromium-bidi": "^0.10.0",
+    "electron": "^33.0.0",
     "utf-8-validate": "^6.0.3",
     "zod": "^3.25.76"
   },
