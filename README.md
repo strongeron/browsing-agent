@@ -19,10 +19,10 @@ This project enables AI agents to interact with web pages through the Mastra fra
 
 ### Prerequisites
 
-- Node.js (v20+)
-- pnpm
-- Browserbase account
-- OpenAI API access
+- Node.js (v22.13.0 or higher)
+- pnpm (install with `npm install -g pnpm`)
+- Browserbase account ([sign up here](https://www.browserbase.com/))
+- API access for at least one model provider (OpenAI, Anthropic, Google, Groq, etc.)
 
 ### Setup
 
@@ -40,10 +40,33 @@ This project enables AI agents to interact with web pages through the Mastra fra
    ```
 
 3. Create a `.env` file with your API keys:
+   
+   You can copy `.env.example` to `.env` and fill in your values:
+   ```bash
+   cp .env.example .env
    ```
+   
+   Then edit `.env` with your actual API keys:
+   ```
+   # Required: Browserbase credentials
    BROWSERBASE_PROJECT_ID=your_project_id
    BROWSERBASE_API_KEY=your_api_key
+   
+   # Required: Model API key (use the one for your chosen model provider)
+   # For OpenAI models (default):
    OPENAI_API_KEY=your_openai_key
+   
+   # For Anthropic models:
+   # ANTHROPIC_API_KEY=your_anthropic_key
+   
+   # For Google models:
+   # GOOGLE_GENERATIVE_AI_API_KEY=your_google_key
+   
+   # For Groq models:
+   # GROQ_API_KEY=your_groq_key
+   
+   # Optional: Override default model
+   # MODEL=openai/gpt-4o
    ```
 
 ## Model Configuration
@@ -68,6 +91,49 @@ pnpm run dev
 ```
 
 This will start the Mastra development server, giving you access to the integrated web agent.
+
+### Verifying Your Setup
+
+After starting the dev server, you should see:
+- Mastra server running (typically on `http://localhost:3000`)
+- Access to the web agent through the Mastra UI
+- Console logs indicating successful initialization
+
+## Troubleshooting
+
+### Common Issues
+
+**Environment variables not loading:**
+- Ensure your `.env` file is in the project root directory
+- Check that variable names match exactly (case-sensitive)
+- Restart the dev server after changing `.env` values
+
+**Browserbase connection errors:**
+- Verify your `BROWSERBASE_PROJECT_ID` and `BROWSERBASE_API_KEY` are correct
+- Check your Browserbase account status and billing
+- Ensure you have an active Browserbase project
+
+**Model API errors:**
+- Verify your API key is valid for the model provider you're using
+- Check that you've set the correct environment variable for your chosen model
+- Ensure your API key has sufficient credits/quota
+- **OpenAI API Key Issues:**
+  - If you see "Incorrect API key provided" error:
+    1. Verify your key at https://platform.openai.com/account/api-keys
+    2. Ensure the key starts with `sk-` (personal keys) or `sk-proj-` (project keys)
+    3. Check that there are no extra spaces, quotes, or newlines in your `.env` file
+    4. Regenerate the key if it's been revoked or expired
+    5. Restart the dev server after updating the `.env` file
+    6. Ensure your OpenAI account has billing enabled and sufficient credits
+
+**Node.js version issues:**
+- This project requires Node.js v22.13.0 or higher
+- Check your version with `node --version`
+- Use [nvm](https://github.com/nvm-sh/nvm) to manage Node.js versions if needed
+
+**pnpm not found:**
+- Install pnpm globally: `npm install -g pnpm`
+- Or use npm/yarn if preferred (though pnpm is recommended)
 
 ## Architecture
 
@@ -96,7 +162,7 @@ User Query → Mastra Agent → Stagehand Tools → Browser Interaction → Web 
 
 ## Configuration
 
-The project can be configured through the `.env` file and by modifying the agent instructions in `src/mastra/agents/index.ts`.
+The project can be configured through the `.env` file and by modifying the agent instructions in `src/mastra/agents/web-agent.ts`.
 
 ## Credits
 

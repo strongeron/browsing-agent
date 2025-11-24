@@ -1,5 +1,5 @@
 import { createTool } from '@mastra/core/tools';
-import { z } from 'zod';
+import z from 'zod';
 import { sessionManager } from '../../lib/stage-hand';
 
 export const pageExtractTool = createTool({
@@ -15,17 +15,17 @@ export const pageExtractTool = createTool({
       .describe('Set true for larger-scale extractions, false for small extractions'),
   }),
   outputSchema: z.any().describe('Extracted data according to schema'),
-  execute: async input => {
+  execute: async (inputData) => {
     // Create a default schema if none is provided
     const defaultSchema = {
       content: z.string(),
     };
 
     return await performWebExtraction(
-      input.url,
-      input.instruction,
-      input.schema || defaultSchema,
-      input.useTextExtract,
+      inputData.url,
+      inputData.instruction,
+      inputData.schema || defaultSchema,
+      inputData.useTextExtract,
     );
   },
 });
