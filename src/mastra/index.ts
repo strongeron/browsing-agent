@@ -32,30 +32,58 @@ export const mastra = new Mastra({
           new DefaultExporter(),
           // Langfuse exporter - sends traces to Langfuse cloud
           new LangfuseExporter({
-            publicKey: 'pk-lf-1c89443a-233b-451c-a2cc-03607b302c68',
-            secretKey: 'sk-lf-e80f09f9-e939-48b1-ae9b-d34f1a4734af',
-            baseUrl: 'https://cloud.langfuse.com',
-            realtime: true, // Enable real-time mode for immediate visibility
+            publicKey: process.env.LANGFUSE_PUBLIC_KEY || 'pk-lf-1c89443a-233b-451c-a2cc-03607b302c68',
+            secretKey: process.env.LANGFUSE_SECRET_KEY || 'sk-lf-e80f09f9-e939-48b1-ae9b-d34f1a4734af',
+            baseUrl: process.env.LANGFUSE_BASE_URL || 'https://cloud.langfuse.com',
+            realtime: process.env.NODE_ENV === 'development',
             options: {
               environment: process.env.NODE_ENV || 'development',
             },
           }),
-          // Custom OTLP exporter - sends traces to Prism Observer endpoint
-          new OtelExporter({
-            serviceName: 'browsing-agent',
-            provider: {
-              custom: {
-                endpoint: 'http://localhost:58551/api/integrations/v1/traces',
-                protocol: 'http/json',
-                headers: {
-                  'x-integration-token': '96ab041e-8a6a-40fc-bc9b-ce432c3db857',
-                },
-              },
-            },
-          }),
+          // Custom OTLP exporter - only enabled locally (not in cloud)
+          ...(process.env.OTLP_ENDPOINT
+            ? [
+                new OtelExporter({
+                  serviceName: 'browsing-agent',
+                  provider: {
+                    custom: {
+                      endpoint: process.env.OTLP_ENDPOINT,
+                      protocol: 'http/json',
+                      headers: {
+                        'x-integration-token': process.env.OTLP_TOKEN || '96ab041e-8a6a-40fc-bc9b-ce432c3db857',
+                      },
+                    },
+                  },
+                }),
+              ]
+            : []),
+        ],
+      },
+      cloud: {
+        serviceName: 'browsing-agent',
+        exporters: [
+          // Default exporter - stores traces in Mastra Cloud storage (enables Agent Studio)
+          new DefaultExporter(),
+          // Langfuse exporter - sends traces to Langfuse cloud
+          ...(process.env.LANGFUSE_PUBLIC_KEY && process.env.LANGFUSE_SECRET_KEY
+            ? [
+                new LangfuseExporter({
+                  publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+                  secretKey: process.env.LANGFUSE_SECRET_KEY,
+                  baseUrl: process.env.LANGFUSE_BASE_URL || 'https://cloud.langfuse.com',
+                  realtime: false, // Batch mode for production
+                  options: {
+                    environment: 'production',
+                  },
+                }),
+              ]
+            : []),
         ],
       },
     },
-    configSelector: () => 'local',
+    configSelector: () => {
+      // Use 'cloud' config when deployed on Mastra Cloud, 'local' otherwise
+      return process.env.MASTRA_CLOUD === 'true' || process.env.NODE_ENV === 'production' ? 'cloud' : 'local';
+    },
   }),
 });

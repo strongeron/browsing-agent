@@ -99,6 +99,93 @@ After starting the dev server, you should see:
 - Access to the web agent through the Mastra UI
 - Console logs indicating successful initialization
 
+## Deployment to Mastra Cloud
+
+This project is configured for deployment to [Mastra Cloud](https://cloud.mastra.ai/), which provides:
+- **Agent Studio**: Test and interact with your agents directly in the cloud
+- **Automatic deployments**: Continuous integration from GitHub
+- **Built-in observability**: Traces stored in Mastra Cloud storage
+- **Production-ready infrastructure**: Managed hosting for your Mastra applications
+
+### Prerequisites
+
+- A Mastra Cloud account ([Sign up here](https://cloud.mastra.ai/))
+- Your project pushed to a GitHub repository
+- Environment variables configured in Mastra Cloud dashboard
+
+### Deployment Steps
+
+1. **Sign in to Mastra Cloud**
+   - Visit [https://cloud.mastra.ai/](https://cloud.mastra.ai/)
+   - Sign in with your GitHub or Google account
+
+2. **Install Mastra GitHub App**
+   - When prompted, install the Mastra GitHub app
+   - This enables automatic deployments from your repository
+
+3. **Create a New Project**
+   - Click "Create new project" in the dashboard
+   - Search for and select your GitHub repository (`strongeron/browsing-agent`)
+   - Click "Import"
+
+4. **Configure Deployment Settings**
+   - **Project Name**: `browsing-agent` (or your preferred name)
+   - **Branch**: `main` (or your default branch)
+   - **Project Root**: `/` (root directory)
+   - **Mastra Directory**: `src/mastra` (auto-detected)
+   - **Install Command**: `pnpm install`
+   - **Port**: Auto-detected (typically `4113`)
+
+5. **Set Environment Variables**
+   Add the following environment variables in the Mastra Cloud dashboard:
+   ```
+   BROWSERBASE_PROJECT_ID=your_project_id
+   BROWSERBASE_API_KEY=your_api_key
+   OPENAI_API_KEY=your_openai_key
+   MODEL=openai/gpt-4o
+   
+   # Optional: Langfuse observability
+   LANGFUSE_PUBLIC_KEY=your_langfuse_public_key
+   LANGFUSE_SECRET_KEY=your_langfuse_secret_key
+   LANGFUSE_BASE_URL=https://cloud.langfuse.com
+   
+   # Optional: OTLP endpoint (for local development only)
+   # OTLP_ENDPOINT=http://localhost:58551/api/integrations/v1/traces
+   # OTLP_TOKEN=your_token
+   ```
+
+6. **Deploy the Project**
+   - Click "Deploy Project"
+   - Mastra Cloud will build and deploy your application
+   - Wait for the deployment to complete (usually 2-5 minutes)
+
+7. **Access Agent Studio**
+   - After deployment, navigate to your project dashboard
+   - Click on "Agents" section
+   - Select `web-agent` to open Agent Studio
+   - Use the chat interface to interact with your agent
+
+### Observability Configuration
+
+The project is configured with environment-aware observability:
+
+- **Local Development**: Uses `local` config with Console, Default, Langfuse, and OTLP exporters
+- **Mastra Cloud**: Uses `cloud` config with Default (Agent Studio) and Langfuse exporters
+
+The configuration automatically switches based on:
+- `MASTRA_CLOUD=true` environment variable (set by Mastra Cloud)
+- `NODE_ENV=production` (production deployments)
+
+### Continuous Deployment
+
+Once configured, any push to the `main` branch will automatically trigger a new deployment on Mastra Cloud. You can monitor deployments in the project dashboard.
+
+### Monitoring and Logs
+
+- **Logs**: View application logs in the Mastra Cloud dashboard
+- **Traces**: Access traces through Agent Studio or Langfuse dashboard
+- **Metrics**: Monitor performance and usage in the project overview
+
 ## Troubleshooting
 
 ### Common Issues
